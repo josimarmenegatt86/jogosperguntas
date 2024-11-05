@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz SENAI - SQL</title>
+  <title>Quiz - Comandos SQL</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -73,7 +73,7 @@
 </head>
 <body>
 
-  <h1>Quiz - Comandos SQL</h1>
+  <h1 id="quizTitle">Quiz - Comandos SQL</h1>
   <div id="startContainer">
     <label for="playerName">Digite seu nome:</label>
     <input type="text" id="playerName" placeholder="Seu nome aqui">
@@ -202,6 +202,9 @@
         alert('Por favor, insira seu nome para começar.');
         return;
       }
+
+      // Exibe o nome do jogador no título do quiz
+      document.getElementById('quizTitle').innerText = `Quiz - Comandos SQL (${playerName})`;
 
       // Esconde o container de início e mostra o quiz
       document.getElementById('startContainer').style.display = 'none';
