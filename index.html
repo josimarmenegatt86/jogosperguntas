@@ -1,4 +1,94 @@
-const questions = [
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz - Comandos SQL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .score-board {
+      font-size: 1.2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .question-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .option:hover {
+      background-color: #2980b9;
+    }
+
+    .option.correct {
+      background-color: #27ae60;
+      color: #fff;
+    }
+
+    .option.incorrect {
+      background-color: #e74c3c;
+      color: #fff;
+    }
+
+    #startContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 id="quizTitle">Quiz - Comandos SQL</h1>
+  <div id="startContainer">
+    <label for="playerName">Digite seu nome:</label>
+    <input type="text" id="playerName" placeholder="Seu nome aqui">
+    <button onclick="startGame()">Começar o Quiz</button>
+  </div>
+  <div class="score-board" style="display: none;" id="scoreBoardContainer">
+    <span id="scoreBoard">Pontuação: 0</span> | <span id="timeBoard">Tempo: 0s</span>
+  </div>
+  <div class="question-container" id="questionContainer" style="display: none;">
+    <!-- Pergunta e opções serão geradas via JavaScript -->
+  </div>
+  <div class="options-container" id="optionsContainer" style="display: none;"></div>
+
+  <script>
+   const questions = [
   { question: "Qual comando é usado para **selecionar e visualizar dados** em uma tabela de um banco de dados?", answer: "SELECT" },
   { question: "Qual comando permite **adicionar novos registros** em uma tabela já existente?", answer: "INSERT" },
   { question: "Qual comando é utilizado para **remover dados** específicos de uma tabela?", answer: "DELETE" },
@@ -22,3 +112,112 @@ const questions = [
   { question: "Qual tipo de `JOIN` retorna todos os registros da tabela à esquerda, mesmo **sem correspondência** na tabela da direita?", answer: "LEFT JOIN" },
   { question: "Qual cláusula é utilizada para **limitar a quantidade de registros** exibidos nos resultados de uma consulta?", answer: "LIMIT" }
 ];
+
+
+    let playerName = '';
+    let score = 0;
+    let questionIndex = 0;
+    let timer;
+    let timeElapsed = 0;
+
+    // Função para iniciar o cronômetro
+    function startTimer() {
+      timer = setInterval(() => {
+        timeElapsed++;
+        document.getElementById('timeBoard').innerText = `Tempo: ${timeElapsed}s`;
+      }, 1000);
+    }
+
+    // Função para parar o cronômetro
+    function stopTimer() {
+      clearInterval(timer);
+    }
+
+    // Embaralha as perguntas e opções
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Atualiza a pontuação na interface
+    function updateScore(points) {
+      score += points;
+      document.getElementById('scoreBoard').innerText = `Pontuação: ${score}`;
+    }
+
+    // Carrega a próxima pergunta
+    function loadQuestion() {
+      if (questionIndex >= questions.length) {
+        stopTimer();
+        alert(`Parabéns, ${playerName}! Você completou o quiz com ${score} pontos em ${timeElapsed} segundos.`);
+        return;
+      }
+
+      const questionData = questions[questionIndex];
+      document.getElementById('questionContainer').innerText = questionData.question;
+
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.innerHTML = '';
+
+      const correctAnswer = questionData.answer;
+      const options = [correctAnswer];
+
+      // Gera opções incorretas aleatórias
+      const otherCommands = questions.map(q => q.answer).filter(a => a !== correctAnswer);
+      shuffle(otherCommands);
+      options.push(...otherCommands.slice(0, 3));
+      shuffle(options);
+
+      options.forEach(option => {
+        const optionButton = document.createElement('button');
+        optionButton.classList.add('option');
+        optionButton.innerText = option;
+        optionButton.addEventListener('click', () => checkAnswer(optionButton, correctAnswer));
+        optionsContainer.appendChild(optionButton);
+      });
+    }
+
+    // Verifica a resposta do jogador
+    function checkAnswer(button, correctAnswer) {
+      if (button.innerText === correctAnswer) {
+        button.classList.add('correct');
+        updateScore(10); // Pontos para acerto
+      } else {
+        button.classList.add('incorrect');
+        updateScore(-5); // Pontos para erro
+      }
+
+      // Avança para a próxima pergunta após um curto delay
+      setTimeout(() => {
+        questionIndex++;
+        loadQuestion();
+      }, 1000);
+    }
+
+    // Função para iniciar o jogo
+    function startGame() {
+      playerName = document.getElementById('playerName').value.trim();
+      if (!playerName) {
+        alert('Por favor, insira seu nome para começar.');
+        return;
+      }
+
+      // Exibe o nome do jogador no título do quiz
+      document.getElementById('quizTitle').innerText = `Quiz - Comandos SQL (${playerName})`;
+
+      // Esconde o container de início e mostra o quiz
+      document.getElementById('startContainer').style.display = 'none';
+      document.getElementById('scoreBoardContainer').style.display = 'block';
+      document.getElementById('questionContainer').style.display = 'block';
+      document.getElementById('optionsContainer').style.display = 'flex';
+
+      shuffle(questions);
+      startTimer();
+      loadQuestion();
+    }
+  </script>
+
+</body>
+</html>
