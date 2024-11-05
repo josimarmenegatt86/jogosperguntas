@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz - Comandos SQL</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .score-board {
+      font-size: 1.2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .question-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .option:hover {
+      background-color: #2980b9;
+    }
+
+    .option.correct {
+      background-color: #27ae60;
+      color: #fff;
+    }
+
+    .option.incorrect {
+      background-color: #e74c3c;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Quiz - Comandos SQL</h1>
+  <div class="score-board">
+    <span id="scoreBoard">Pontuação: 0</span> | <span id="timeBoard">Tempo: 0s</span>
+  </div>
+  <div class="question-container" id="questionContainer">
+    <!-- Pergunta e opções serão geradas via JavaScript -->
+  </div>
+  <div class="options-container" id="optionsContainer"></div>
+
+  <script>
+    const questions = [
+      { question: "Extrai dados de um banco de dados", answer: "SELECT" },
+      { question: "Insere novos dados em uma tabela", answer: "INSERT" },
+      { question: "Remove dados de uma tabela", answer: "DELETE" },
+      { question: "Modifica dados existentes em uma tabela", answer: "UPDATE" },
+      { question: "Cria uma nova tabela ou banco de dados", answer: "CREATE" },
+      { question: "Exclui uma tabela ou banco de dados", answer: "DROP" },
+      { question: "Modifica a estrutura de uma tabela", answer: "ALTER" },
+      { question: "Combina registros de várias tabelas", answer: "JOIN" }
+    ];
+
+    let score = 0;
+    let questionIndex = 0;
+    let timer;
+    let timeElapsed = 0;
+
+    // Função para iniciar o cronômetro
+    function startTimer() {
+      timer = setInterval(() => {
+        timeElapsed++;
+        document.getElementById('timeBoard').innerText = `Tempo: ${timeElapsed}s`;
+      }, 1000);
+    }
+
+    // Função para parar o cronômetro
+    function stopTimer() {
+      clearInterval(timer);
+    }
+
+    // Embaralha as perguntas e opções
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Atualiza a pontuação na interface
+    function updateScore(points) {
+      score += points;
+      document.getElementById('scoreBoard').innerText = `Pontuação: ${score}`;
+    }
+
+    // Carrega a próxima pergunta
+    function loadQuestion() {
+      if (questionIndex >= questions.length) {
+        stopTimer();
+        alert(`Quiz concluído! Sua pontuação final foi ${score} pontos em ${timeElapsed} segundos.`);
+        return;
+      }
+
+      const questionData = questions[questionIndex];
+      document.getElementById('questionContainer').innerText = questionData.question;
+
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.innerHTML = '';
+
+      const correctAnswer = questionData.answer;
+      const options = [correctAnswer];
+
+      // Gera opções incorretas aleatórias
+      const otherCommands = questions.map(q => q.answer).filter(a => a !== correctAnswer);
+      shuffle(otherCommands);
+      options.push(...otherCommands.slice(0, 3));
+      shuffle(options);
+
+      options.forEach(option => {
+        const optionButton = document.createElement('button');
+        optionButton.classList.add('option');
+        optionButton.innerText = option;
+        optionButton.addEventListener('click', () => checkAnswer(optionButton, correctAnswer));
+        optionsContainer.appendChild(optionButton);
+      });
+    }
+
+    // Verifica a resposta do jogador
+    function checkAnswer(button, correctAnswer) {
+      if (button.innerText === correctAnswer) {
+        button.classList.add('correct');
+        updateScore(10); // Pontos para acerto
+      } else {
+        button.classList.add('incorrect');
+        updateScore(-5); // Pontos para erro
+      }
+
+      // Avança para a próxima pergunta após um curto delay
+      setTimeout(() => {
+        questionIndex++;
+        loadQuestion();
+      }, 1000);
+    }
+
+    // Inicia o quiz
+    shuffle(questions);
+    startTimer();
+    loadQuestion();
+  </script>
+
+</body>
+</html>
